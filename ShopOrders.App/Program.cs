@@ -10,12 +10,16 @@ Order order = new()
 
 order.AddLine(new OrderLine
 {
-    Sku = "SKU-001", Quantity = 2, UnitPrice = 149.50m,
+    Sku = "SKU-001",
+    Quantity = 2,
+    UnitPrice = 149.50m,
 });
 
 order.AddLine(new OrderLine
 {
-    Sku = "SKU-002", Quantity = 1, UnitPrice = 89.90m,
+    Sku = "SKU-002",
+    Quantity = 1,
+    UnitPrice = 89.90m,
 });
 
 string total = order.Total()
