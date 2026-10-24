@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Core", "ShopOrde
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.App", "ShopOrders.App\ShopOrders.App.csproj", "{0E3FCC63-5116-4A89-A514-F29243991774}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Domain", "ShopOrders.Domain\ShopOrders.Domain.csproj", "{DBA335C3-7728-4AC2-94B1-976E44673022}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{0E3FCC63-5116-4A89-A514-F29243991774}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E3FCC63-5116-4A89-A514-F29243991774}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E3FCC63-5116-4A89-A514-F29243991774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBA335C3-7728-4AC2-94B1-976E44673022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBA335C3-7728-4AC2-94B1-976E44673022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBA335C3-7728-4AC2-94B1-976E44673022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBA335C3-7728-4AC2-94B1-976E44673022}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

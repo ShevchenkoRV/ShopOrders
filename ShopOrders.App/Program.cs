@@ -1,31 +1,11 @@
-using System.Globalization;
-using ShopOrders.Core.Domain;
-
-Order order = new()
-{
-    Id = 1,
-    CustomerId = 10,
-    CreatedAt = DateTimeOffset.Now,
-};
-
-order.AddLine(new OrderLine
-{
-    Sku = "SKU-001",
-    Quantity = 2,
-    UnitPrice = 149.50m,
-});
-
-order.AddLine(new OrderLine
-{
-    Sku = "SKU-002",
-    Quantity = 1,
-    UnitPrice = 89.90m,
-});
-
-string total = order.Total()
-    .ToString("F2", CultureInfo.InvariantCulture);
-
-Console.WriteLine($"Замовлення #{order.Id}");
-Console.WriteLine($"Стан: {order.Status}");
-Console.WriteLine($"Позицій: {order.Lines.Count}");
-Console.WriteLine($"Сума: {total}");
+using System.Text;
+using ShopOrders.Domain;
+Console.OutputEncoding = Encoding.UTF8;
+var z = new zakaz("A-1001", "Іваненко");
+z.Add("SKU-1", 3, 250m);
+z.Add("SKU-2", 12, 90m);
+Console.WriteLine(z.ProcessData(false));
+Console.WriteLine(z.ProcessData(true));
+Console.WriteLine(z.Ck());
+Console.WriteLine(z.Chg(1));
+Console.Write(z.Rep());
