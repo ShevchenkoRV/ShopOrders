@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace ShopOrders.Domain;
 
 /// <summary>
@@ -9,9 +5,46 @@ namespace ShopOrders.Domain;
 /// </summary>
 public class Order
 {
-    private readonly List<string[]> _lines = new List<string[]>();
+    /// <summary>Стан замовлення: новий.</summary>
+    public const int StatusNew = 0;
 
-    // public string prim; // примітка, поки не треба
+    /// <summary>Стан замовлення: оплачений.</summary>
+    public const int StatusPaid = 1;
+
+    /// <summary>Стан замовлення: відправлений.</summary>
+    public const int StatusShipped = 2;
+
+    /// <summary>Стан замовлення: скасований.</summary>
+    public const int StatusCancelled = 3;
+
+    /// <summary>Ставка податку на додану вартість.</summary>
+    private const decimal VatRate = 0.2m;
+
+    /// <summary>Поріг суми для знижки постійному покупцю.</summary>
+    private const decimal RegularDiscountThreshold = 1000m;
+
+    /// <summary>Частка знижки постійному покупцю.</summary>
+    private const decimal RegularDiscountRate = 0.10m;
+
+    /// <summary>Поріг суми для знижки на велике замовлення.</summary>
+    private const decimal LargeOrderThreshold = 5000m;
+
+    /// <summary>Частка знижки на велике замовлення.</summary>
+    private const decimal LargeOrderDiscountRate = 0.15m;
+
+    /// <summary>Кількість рядків, з якої діє гуртова знижка.</summary>
+    private const int BulkLineCount = 10;
+
+    /// <summary>Сума гуртової знижки, грн.</summary>
+    private const decimal BulkDiscountAmount = 100m;
+
+    /// <summary>Найбільша допустима кількість рядків у замовленні.</summary>
+    private const int MaxLineCount = 100;
+
+    /// <summary>Найкоротше допустиме прізвище покупця.</summary>
+    private const int MinCustomerNameLength = 3;
+
+    private readonly List<string[]> _lines = new List<string[]>();
 
     /// <summary>
     /// Створює нове замовлення у стані «новий».
@@ -36,7 +69,8 @@ public class Order
     public string CustomerName { get; private set; }
 
     /// <summary>
-    /// Поточний стан: 0 — новий, 1 — оплачений, 2 — відправлений, 3 — скасований.
+    /// Поточний стан: одне зі значень від StatusNew до StatusCancelled
+    /// (за замовчуванням StatusNew).
     /// </summary>
     public int Status { get; private set; }
 
@@ -97,25 +131,19 @@ public class Order
             lineCount = lineCount + 1;
         }
 
-        // if (sum1 > 500) { sum1 = sum1 - 50; } // стара знижка
-
         // Знижка постійному покупцю і знижка на велике замовлення не поєднуються
-        if (isRegularCustomer == true && total > 1000)
+        if (isRegularCustomer && total > RegularDiscountThreshold)
         {
-            total = total * 0.9m;
+            total *= 1m - RegularDiscountRate;
         }
-        else if (total > 5000)
+        else if (total > LargeOrderThreshold)
         {
-            total = total * 0.85m;
-        }
-        else
-        {
-            total = total;
+            total *= 1m - LargeOrderDiscountRate;
         }
 
-        if (lineCount > 10)
+        if (lineCount > BulkLineCount)
         {
-            total = total - 100;
+            total -= BulkDiscountAmount;
         }
 
         if (total < 0)
@@ -124,7 +152,7 @@ public class Order
         }
 
         // ПДВ нараховується на суму вже після всіх знижок
-        total = total + total * 0.2m;
+        total += total * VatRate;
         return Math.Round(total, 2);
     }
 
@@ -138,21 +166,21 @@ public class Order
     /// </returns>
     public bool TryChangeStatus(int newStatus)
     {
-        if (Status == 0 && newStatus == 1)
+        if (Status == StatusNew && newStatus == StatusPaid)
         {
-            Status = 1;
+            Status = StatusPaid;
             return true;
         }
 
-        if (Status == 1 && newStatus == 2)
+        if (Status == StatusPaid && newStatus == StatusShipped)
         {
-            Status = 2;
+            Status = StatusShipped;
             return true;
         }
 
-        if (Status == 0 && newStatus == 3)
+        if (Status == StatusNew && newStatus == StatusCancelled)
         {
-            Status = 3;
+            Status = StatusCancelled;
             return true;
         }
 
@@ -167,20 +195,14 @@ public class Order
     /// </returns>
     public bool IsValid()
     {
-        if (Id != null && Id != ""
+        return Id != null
+            && Id != ""
             && CustomerName != null
-            && CustomerName.Length > 2
+            && CustomerName.Length >= MinCustomerNameLength
             && _lines.Count > 0
-            && _lines.Count < 100
-            && Status >= 0
-            && Status <= 3)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+            && _lines.Count < MaxLineCount
+            && Status >= StatusNew
+            && Status <= StatusCancelled;
     }
 
     /// <summary>
