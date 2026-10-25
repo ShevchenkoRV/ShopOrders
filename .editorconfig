@@ -45,7 +45,7 @@ dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1309.severity = none
 # XML-документацію вимагатимемо з ЛР № 4, поки що ні
 dotnet_diagnostic.SA0001.severity = none
-dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1600.severity = warning
 dotnet_diagnostic.SA1601.severity = none
 dotnet_diagnostic.SA1602.severity = none
 # кома в кінці багаторядкового ініціалізатора необов’язкова
@@ -57,3 +57,19 @@ dotnet_diagnostic.SA1201.severity = warning
 dotnet_diagnostic.SA1503.severity = warning
 dotnet_diagnostic.SA1516.severity = warning
 dotnet_diagnostic.IDE0055.severity = warning
+
+# ЛР 2: правила, вимкнені свідомо
+# StyleCop вимагає англійських зачинів «Gets or sets» і «Initializes a new instance»,
+# а документація проєкту пишеться українською
+dotnet_diagnostic.SA1623.severity = none
+dotnet_diagnostic.SA1642.severity = none
+# Parse() і ToString() без культури лишено, бо зміна змінить вивід (технічний борг TD-2)
+dotnet_diagnostic.CA1305.severity = none
+
+# константи: PascalCase за п. 2 стандарту (виняток із правила приватних полів)
+dotnet_naming_rule.constants_pascal.symbols = const_field
+dotnet_naming_rule.constants_pascal.style = pascal_case_style
+dotnet_naming_rule.constants_pascal.severity = warning
+dotnet_naming_symbols.const_field.applicable_kinds = field
+dotnet_naming_symbols.const_field.required_modifiers = const
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case

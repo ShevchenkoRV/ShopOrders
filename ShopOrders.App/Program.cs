@@ -1,31 +1,12 @@
-using System.Globalization;
-using ShopOrders.Core.Domain;
+using System.Text;
+using ShopOrders.Domain;
 
-Order order = new()
-{
-    Id = 1,
-    CustomerId = 10,
-    CreatedAt = DateTimeOffset.Now,
-};
-
-order.AddLine(new OrderLine
-{
-    Sku = "SKU-001",
-    Quantity = 2,
-    UnitPrice = 149.50m,
-});
-
-order.AddLine(new OrderLine
-{
-    Sku = "SKU-002",
-    Quantity = 1,
-    UnitPrice = 89.90m,
-});
-
-string total = order.Total()
-    .ToString("F2", CultureInfo.InvariantCulture);
-
-Console.WriteLine($"Замовлення #{order.Id}");
-Console.WriteLine($"Стан: {order.Status}");
-Console.WriteLine($"Позицій: {order.Lines.Count}");
-Console.WriteLine($"Сума: {total}");
+Console.OutputEncoding = Encoding.UTF8;
+var order = new Order("A-1001", "Іваненко");
+order.AddLine("SKU-1", 3, 250m);
+order.AddLine("SKU-2", 12, 90m);
+Console.WriteLine(order.CalculateTotal(false));
+Console.WriteLine(order.CalculateTotal(true));
+Console.WriteLine(order.IsValid());
+Console.WriteLine(order.TryChangeStatus(Order.StatusPaid));
+Console.Write(order.BuildReport());
