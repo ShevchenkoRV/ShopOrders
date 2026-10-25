@@ -85,7 +85,7 @@ public class Order
     /// <param name="orders">Список замовлень, у якому виконується пошук.</param>
     /// <param name="orderId">Шуканий номер замовлення.</param>
     /// <returns>Перше знайдене замовлення або null, якщо такого немає.</returns>
-    public static Order FindById(List<Order> orders, string orderId)
+    public static Order? FindById(List<Order> orders, string orderId)
     {
         for (int i = 0; i < orders.Count; i++)
         {
@@ -127,8 +127,8 @@ public class Order
         {
             int quantity = int.Parse(_lines[i][1]);
             decimal unitPrice = decimal.Parse(_lines[i][2]);
-            total = total + quantity * unitPrice;
-            lineCount = lineCount + 1;
+            total += quantity * unitPrice;
+            lineCount++;
         }
 
         // Знижка постійному покупцю і знижка на велике замовлення не поєднуються
@@ -196,7 +196,7 @@ public class Order
     public bool IsValid()
     {
         return Id != null
-            && Id != ""
+            && Id.Length > 0
             && CustomerName != null
             && CustomerName.Length >= MinCustomerNameLength
             && _lines.Count > 0
@@ -211,7 +211,7 @@ public class Order
     /// <returns>Текст звіту: рядки замовлення та підсумкова сума.</returns>
     public string BuildReport()
     {
-        string report = "";
+        string report = string.Empty;
         for (int i = 0; i < _lines.Count; i++)
         {
             string[] line = _lines[i];

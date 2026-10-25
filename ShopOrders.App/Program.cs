@@ -1,5 +1,6 @@
 using System.Text;
 using ShopOrders.Domain;
+
 Console.OutputEncoding = Encoding.UTF8;
 var order = new Order("A-1001", "Іваненко");
 order.AddLine("SKU-1", 3, 250m);
