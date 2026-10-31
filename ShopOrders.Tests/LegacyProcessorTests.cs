@@ -1,3 +1,4 @@
+using ShopOrders.Core.Documents;
 using ShopOrders.Core.Domain;
 using ShopOrders.Core.Legacy;
 using Xunit;
@@ -42,14 +43,18 @@ public class LegacyProcessorTests
     }
 
     [Fact]
-    public void Process_NoLines_ReturnsMinusOne()
+    public void Calculate_NoLines_ThrowsArgument()
     {
-        DateOnly created = new(2026, 3, 10);
+        Assert.Throws<ArgumentException>(
+            () => DocumentGuards.EnsureLinesValid(new List<OrderLine>()));
+    }
 
-        decimal total = LegacyProcessor.Process(
-            3, "Коваль", "k@ex.com", false, new List<OrderLine>(),
-            created, string.Empty, "New", false, 60m, out string next);
+    [Fact]
+    public void Calculate_ZeroQuantity_ThrowsRange()
+    {
+        OrderLine line = new() { Sku = "A1", Quantity = 0, UnitPrice = 10m };
 
-        Assert.Equal(-1m, total);
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => DocumentGuards.EnsureLineValid(line));
     }
 }
