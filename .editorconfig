@@ -73,3 +73,7 @@ dotnet_naming_rule.constants_pascal.severity = warning
 dotnet_naming_symbols.const_field.applicable_kinds = field
 dotnet_naming_symbols.const_field.required_modifiers = const
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+[ShopOrders.Tests/**.cs]
+# Імена тестів у форматі Метод_Сценарій_Результат містять підкреслення
+dotnet_diagnostic.CA1707.severity = none
