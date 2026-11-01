@@ -1,5 +1,6 @@
 using ShopOrders.Core.Documents;
 using ShopOrders.Core.Domain;
+using ShopOrders.Core.Reporting;
 using Xunit;
 
 namespace ShopOrders.Tests;
@@ -103,6 +104,28 @@ public class DocumentTotalCalculatorTests
         };
 
         Assert.Throws<ArgumentException>(() => DocumentTotalCalculator.Calculate(request));
+    }
+
+    [Fact]
+    public void TextOf_ContainsTotalLine()
+    {
+        TotalRequest request = BuildSampleRequest();
+        TotalResult result = DocumentTotalCalculator.Calculate(request);
+
+        string text = DocumentReport.TextOf(request, result);
+
+        Assert.Contains("Разом: 1292.70", text);
+    }
+
+    [Fact]
+    public void Print_WritesReportToOutput()
+    {
+        StringWriter writer = new();
+        DocumentReportPrinter printer = new(writer);
+
+        printer.Print("Разом: 10.00");
+
+        Assert.Contains("10.00", writer.ToString());
     }
 
     private static TotalRequest BuildSampleRequest()

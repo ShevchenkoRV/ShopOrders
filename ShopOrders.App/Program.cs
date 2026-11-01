@@ -1,12 +1,14 @@
 using System.Text;
 using ShopOrders.Core.Documents;
 using ShopOrders.Core.Domain;
+using ShopOrders.Core.Reporting;
 
 Console.OutputEncoding = Encoding.UTF8;
 
 TotalRequest request = BuildRequestFromInput();
 TotalResult result = DocumentTotalCalculator.Calculate(request);
-Console.WriteLine(result.Total);
+string report = DocumentReport.TextOf(request, result);
+new DocumentReportPrinter(Console.Out).Print(report);
 
 static TotalRequest BuildRequestFromInput()
 {
