@@ -1,11 +1,10 @@
 using ShopOrders.Core.Documents;
 using ShopOrders.Core.Domain;
-using ShopOrders.Core.Legacy;
 using Xunit;
 
 namespace ShopOrders.Tests;
 
-public class LegacyProcessorTests
+public class DocumentTotalCalculatorTests
 {
     [Fact]
     public void Process_RegularClient_Returns1292()
@@ -17,12 +16,12 @@ public class LegacyProcessorTests
         };
         DateOnly created = new(2026, 3, 10);
 
-        decimal total = LegacyProcessor.Process(
-            1, "Іваненко", "i@ex.com", true, lines,
-            created, string.Empty, "New", false, 60m, out string next);
+        decimal total = DocumentTotalCalculator.Process(
+            1, "Іваненко", "i@ex.com", true, lines, created,
+            string.Empty, DocumentStatus.New, false, 60m, out DocumentStatus next);
 
         Assert.Equal(1292.70m, total);
-        Assert.Equal("Paid", next);
+        Assert.Equal(DocumentStatus.Paid, next);
     }
 
     [Fact]
@@ -34,12 +33,12 @@ public class LegacyProcessorTests
         };
         DateOnly created = new(2026, 3, 10);
 
-        decimal total = LegacyProcessor.Process(
-            2, "Петренко", "p@ex.com", false, lines,
-            created, "SALE10", "Paid", false, 60m, out string next);
+        decimal total = DocumentTotalCalculator.Process(
+            2, "Петренко", "p@ex.com", false, lines, created,
+            "SALE10", DocumentStatus.Paid, false, 60m, out DocumentStatus next);
 
         Assert.Equal(420m, total);
-        Assert.Equal("Shipped", next);
+        Assert.Equal(DocumentStatus.Shipped, next);
     }
 
     [Fact]
