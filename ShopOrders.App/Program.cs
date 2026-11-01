@@ -1,12 +1,21 @@
 using System.Text;
-using ShopOrders.Domain;
+using ShopOrders.Core.Documents;
+using ShopOrders.Core.Domain;
 
 Console.OutputEncoding = Encoding.UTF8;
-var order = new Order("A-1001", "Іваненко");
-order.AddLine("SKU-1", 3, 250m);
-order.AddLine("SKU-2", 12, 90m);
-Console.WriteLine(order.CalculateTotal(false));
-Console.WriteLine(order.CalculateTotal(true));
-Console.WriteLine(order.IsValid());
-Console.WriteLine(order.TryChangeStatus(Order.StatusPaid));
-Console.Write(order.BuildReport());
+
+TotalRequest request = BuildRequestFromInput();
+TotalResult result = DocumentTotalCalculator.Calculate(request);
+Console.WriteLine(result.Total);
+
+static TotalRequest BuildRequestFromInput()
+{
+    List<OrderLine> lines = new()
+    {
+        new OrderLine { Sku = "A1", Quantity = 12, UnitPrice = 100m },
+        new OrderLine { Sku = "B2", Quantity = 1, UnitPrice = 250m },
+    };
+    ClientInfo client = new("Іваненко", "i@ex.com", true);
+    DateOnly createdAt = new(2026, 3, 10);
+    return new TotalRequest(1, client, lines, createdAt, null, DocumentStatus.New, 60m);
+}

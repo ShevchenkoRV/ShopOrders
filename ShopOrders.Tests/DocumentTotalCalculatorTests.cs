@@ -7,38 +7,75 @@ namespace ShopOrders.Tests;
 public class DocumentTotalCalculatorTests
 {
     [Fact]
-    public void Process_RegularClient_Returns1292()
+    public void Calculate_RegularClient_Returns1292()
     {
-        List<OrderLine> lines = new()
-        {
-            new OrderLine { Sku = "A1", Quantity = 12, UnitPrice = 100m },
-            new OrderLine { Sku = "B2", Quantity = 1, UnitPrice = 250m },
-        };
-        DateOnly created = new(2026, 3, 10);
+        TotalRequest request = new(
+            DocumentId: 1,
+            Client: new ClientInfo("Іваненко", "i@ex.com", true),
+            Lines: new List<OrderLine>
+            {
+                new() { Sku = "A1", Quantity = 12, UnitPrice = 100m },
+                new() { Sku = "B2", Quantity = 1, UnitPrice = 250m },
+            },
+            CreatedAt: new DateOnly(2026, 3, 10),
+            CouponCode: null,
+            Status: DocumentStatus.New,
+            DeliveryPrice: 60m);
 
-        decimal total = DocumentTotalCalculator.Process(
-            1, "Іваненко", "i@ex.com", true, lines, created,
-            string.Empty, DocumentStatus.New, false, 60m, out DocumentStatus next);
+        TotalResult result = DocumentTotalCalculator.Calculate(request);
 
-        Assert.Equal(1292.70m, total);
-        Assert.Equal(DocumentStatus.Paid, next);
+        Assert.Equal(1292.70m, result.Total);
+        Assert.Equal(DocumentStatus.Paid, result.Status);
     }
 
     [Fact]
-    public void Process_SmallOrder_AddsDelivery()
+    public void Calculate_SmallOrder_AddsDelivery()
     {
-        List<OrderLine> lines = new()
+        TotalRequest request = BuildSampleRequest() with
         {
-            new OrderLine { Sku = "A1", Quantity = 2, UnitPrice = 200m },
+            Client = new ClientInfo("Петренко", "p@ex.com", false),
+            Lines = new List<OrderLine> { new() { Sku = "A1", Quantity = 2, UnitPrice = 200m } },
+            CouponCode = "SALE10",
+            Status = DocumentStatus.Paid,
         };
-        DateOnly created = new(2026, 3, 10);
 
-        decimal total = DocumentTotalCalculator.Process(
-            2, "Петренко", "p@ex.com", false, lines, created,
-            "SALE10", DocumentStatus.Paid, false, 60m, out DocumentStatus next);
+        TotalResult result = DocumentTotalCalculator.Calculate(request);
 
-        Assert.Equal(420m, total);
-        Assert.Equal(DocumentStatus.Shipped, next);
+        Assert.Equal(420m, result.Total);
+        Assert.Equal(DocumentStatus.Shipped, result.Status);
+    }
+
+    [Fact]
+    public void Calculate_CancelledDocument_ReturnsZero()
+    {
+        TotalRequest request = BuildSampleRequest() with { Status = DocumentStatus.Cancelled };
+
+        TotalResult result = DocumentTotalCalculator.Calculate(request);
+
+        Assert.Equal(0m, result.Total);
+        Assert.Equal(DocumentStatus.Cancelled, result.Status);
+    }
+
+    [Fact]
+    public void Calculate_SundayFixedCoupon_AppliesAllDiscounts()
+    {
+        TotalRequest request = BuildSampleRequest() with
+        {
+            Client = new ClientInfo("Петренко", "p@ex.com", false),
+            Lines = new List<OrderLine>
+            {
+                new() { Sku = "C1", Quantity = 1, UnitPrice = 3000m },
+                new() { Sku = "D2", Quantity = 1, UnitPrice = 3500m },
+            },
+            CreatedAt = new DateOnly(2026, 3, 8),
+            CouponCode = "MINUS200",
+            Status = DocumentStatus.Paid,
+        };
+
+        TotalResult result = DocumentTotalCalculator.Calculate(request);
+
+        Assert.Equal(5537m, result.Total);
+        Assert.Equal(DocumentStatus.Shipped, result.Status);
     }
 
     [Fact]
@@ -55,5 +92,32 @@ public class DocumentTotalCalculatorTests
 
         Assert.Throws<ArgumentOutOfRangeException>(
             () => DocumentGuards.EnsureLineValid(line));
+    }
+
+    [Fact]
+    public void Calculate_BadEmail_ThrowsArgument()
+    {
+        TotalRequest request = BuildSampleRequest() with
+        {
+            Client = new ClientInfo("Іваненко", "no-at-sign", true),
+        };
+
+        Assert.Throws<ArgumentException>(() => DocumentTotalCalculator.Calculate(request));
+    }
+
+    private static TotalRequest BuildSampleRequest()
+    {
+        return new TotalRequest(
+            DocumentId: 1,
+            Client: new ClientInfo("Іваненко", "i@ex.com", true),
+            Lines: new List<OrderLine>
+            {
+                new() { Sku = "A1", Quantity = 12, UnitPrice = 100m },
+                new() { Sku = "B2", Quantity = 1, UnitPrice = 250m },
+            },
+            CreatedAt: new DateOnly(2026, 3, 10),
+            CouponCode: null,
+            Status: DocumentStatus.New,
+            DeliveryPrice: 60m);
     }
 }

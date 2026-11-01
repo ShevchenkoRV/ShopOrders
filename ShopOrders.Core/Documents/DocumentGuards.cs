@@ -53,4 +53,17 @@ internal static class DocumentGuards
             EnsureLineValid(line);
         }
     }
+
+    /// <summary>
+    /// Перевіряє весь запит на розрахунок: заголовок, позиції та вартість доставки.
+    /// </summary>
+    /// <param name="request">Запит на розрахунок.</param>
+    public static void EnsureRequestValid(TotalRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Client);
+        EnsureHeaderValid(request.DocumentId, request.Client.Name, request.Client.Email);
+        EnsureLinesValid(request.Lines);
+        ArgumentOutOfRangeException.ThrowIfNegative(request.DeliveryPrice);
+    }
 }

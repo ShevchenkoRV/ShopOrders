@@ -122,57 +122,22 @@ public static class DocumentTotalCalculator
     }
 
     /// <summary>
-    /// Диспетчер: викликає кроки розрахунку у фіксованому порядку.
+    /// Рахує підсумок документа: знижки, доставку та наступний стан.
     /// </summary>
-    /// <param name="docId">Номер документа.</param>
-    /// <param name="clientName">Ім’я клієнта.</param>
-    /// <param name="clientEmail">Пошта клієнта.</param>
-    /// <param name="isRegular">Ознака постійного клієнта.</param>
-    /// <param name="lines">Позиції документа.</param>
-    /// <param name="createdAt">Дата створення.</param>
-    /// <param name="couponCode">Код купона або null.</param>
-    /// <param name="status">Поточний стан документа.</param>
-    /// <param name="printToConsole">Чи друкувати звіт у консоль.</param>
-    /// <param name="deliveryPrice">Вартість доставки.</param>
-    /// <param name="newStatus">Стан документа після розрахунку.</param>
-    /// <returns>Підсумкова сума документа.</returns>
-    public static decimal Process(
-        int docId,
-        string clientName,
-        string clientEmail,
-        bool isRegular,
-        IReadOnlyList<OrderLine> lines,
-        DateOnly createdAt,
-        string? couponCode,
-        DocumentStatus status,
-        bool printToConsole,
-        decimal deliveryPrice,
-        out DocumentStatus newStatus)
+    /// <param name="request">Запит на розрахунок.</param>
+    /// <returns>Підсумкова сума та стан документа після розрахунку.</returns>
+    public static TotalResult Calculate(TotalRequest request)
     {
-        DocumentGuards.EnsureHeaderValid(docId, clientName, clientEmail);
-        decimal total = SubtotalOf(lines);
-        total -= ClientDiscountOf(total, isRegular);
+        DocumentGuards.EnsureRequestValid(request);
+        decimal total = SubtotalOf(request.Lines);
+        total -= ClientDiscountOf(total, request.Client.IsRegular);
         total -= VolumeDiscountOf(total);
-        total -= CouponDiscountOf(total, couponCode);
-        total -= WeekendDiscountOf(total, createdAt);
-        total += DeliveryFeeOf(total, deliveryPrice);
-        total = status == DocumentStatus.Cancelled
+        total -= CouponDiscountOf(total, request.CouponCode);
+        total -= WeekendDiscountOf(total, request.CreatedAt);
+        total += DeliveryFeeOf(total, request.DeliveryPrice);
+        total = request.Status == DocumentStatus.Cancelled
             ? 0m
             : Math.Round(Math.Max(total, 0m), PricingRules.MoneyDecimals);
-        newStatus = NextStatusOf(status, total);
-        if (printToConsole)
-        {
-            Console.WriteLine("Документ № " + docId);
-            Console.WriteLine("Клієнт: " + clientName);
-            foreach (OrderLine line in lines)
-            {
-                Console.WriteLine(line.Sku + " x " + line.Quantity);
-            }
-
-            Console.WriteLine("Разом: " + total);
-            Console.WriteLine("Стан: " + newStatus);
-        }
-
-        return total;
+        return new TotalResult(total, NextStatusOf(request.Status, total));
     }
 }
