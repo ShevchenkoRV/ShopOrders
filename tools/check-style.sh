@@ -21,6 +21,11 @@ while IFS= read -r f; do
   check "$f" "A-05 #pragma warning disable заборонено" '#pragma[[:space:]]+warning[[:space:]]+disable'
   check "$f" "C-06 TODO без автора й номера запису (TODO(ІМ, #12))" '(TODO|FIXME)([^(]|\([^)]*\)[^[:space:]]|\([^,)]*\))'
   check "$f" "C-02 закоментований код" '^[[:space:]]*//[[:space:]]*(if|for|foreach|while|var|return)[[:space:](].*[;{)][[:space:]]*$'
+  case "$f" in
+    ShopOrders.Core/*|ShopOrders.Domain/*)
+      check "$f" "X-02 double/float заборонено в бібліотеках логіки" '(^|[^A-Za-z_])(double|float)([^A-Za-z_]|$)'
+      ;;
+  esac
   check "$f" "S-06 goto заборонено" '(^|[^A-Za-z_])goto[[:space:]]'
   check "$f" "S-09 порівняння з true/false" '(==|!=)[[:space:]]*(true|false)([^A-Za-z_]|$)'
   lines=$(wc -l < "$f")
