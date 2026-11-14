@@ -137,7 +137,10 @@ public static class DocumentTotalCalculator
         total += DeliveryFeeOf(total, request.DeliveryPrice);
         total = request.Status == DocumentStatus.Cancelled
             ? 0m
-            : Math.Round(Math.Max(total, 0m), PricingRules.MoneyDecimals);
+            : Math.Round(
+                Math.Max(total, 0m),
+                PricingRules.MoneyDecimals,
+                MidpointRounding.AwayFromZero);
         return new TotalResult(total, NextStatusOf(request.Status, total));
     }
 }

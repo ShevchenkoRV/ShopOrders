@@ -1,0 +1,8 @@
+T:System.Double;Грошові суми й знижки тільки в decimal (X-02)
+T:System.Single;Грошові суми й знижки тільки в decimal (X-02)
+P:System.DateTime.Now;Поточний час лише через TimeProvider (D-17)
+P:System.DateTime.UtcNow;Поточний час лише через TimeProvider (D-17)
+P:System.DateTimeOffset.Now;Поточний час лише через TimeProvider (D-17)
+P:System.DateTimeOffset.UtcNow;Поточний час лише через TimeProvider (D-17)
+M:System.Math.Round(System.Decimal);Округлення лише з MidpointRounding.AwayFromZero (X-03)
+M:System.Math.Round(System.Decimal,System.Int32);Округлення лише з MidpointRounding.AwayFromZero (X-03)

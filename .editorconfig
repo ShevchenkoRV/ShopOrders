@@ -1,7 +1,10 @@
+# Машинна частина стандарту ShopOrders (СР-1). Рівні: ОБОВ'ЯЗКОВО = error,
+# РЕКОМЕНДОВАНО = suggestion, ДОПУСКАЄТЬСЯ = silent/none (A-07).
 root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
@@ -10,70 +13,124 @@ indent_size = 4
 [*.{csproj,props,targets,json,yml}]
 indent_size = 2
 
+[*.md]
+trim_trailing_whitespace = false
+
 [*.cs]
 max_line_length = 100
 
-# форматування у стилі Allman
+# --- Форматування (F) ---
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
 csharp_new_line_before_catch = true
-csharp_prefer_braces = true:warning
+csharp_new_line_before_finally = true
 csharp_indent_case_contents = true
+csharp_prefer_braces = true:error
+csharp_style_namespace_declarations = file_scoped:error
+csharp_using_directive_placement = outside_namespace:error
 dotnet_sort_system_directives_first = true
 
-# сучасний синтаксис C#
-csharp_style_namespace_declarations = file_scoped:warning
+# --- Дані й типи (D) ---
+dotnet_style_qualification_for_field = false:error
+dotnet_style_readonly_field = true:error
 csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+dotnet_style_namespace_match_folder = true:suggestion
 
-# іменування: приватні поля з підкресленням
-dotnet_naming_rule.priv_underscore.symbols = priv_field
-dotnet_naming_rule.priv_underscore.style = underscore_camel
-dotnet_naming_rule.priv_underscore.severity = warning
+# --- Іменування (N) ---
 dotnet_naming_symbols.priv_field.applicable_kinds = field
 dotnet_naming_symbols.priv_field.applicable_accessibilities = private
 dotnet_naming_style.underscore_camel.capitalization = camel_case
 dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_rule.priv_underscore.symbols = priv_field
+dotnet_naming_rule.priv_underscore.style = underscore_camel
+dotnet_naming_rule.priv_underscore.severity = error
 
-# StyleCop: свідомо вимкнені правила
-# заголовок з ліцензією в навчальному проєкті не потрібен
-dotnet_diagnostic.SA1633.severity = none
-# префікс this. суперечить конвенції .NET
-dotnet_diagnostic.SA1101.severity = none
-# using поза namespace — стандарт шаблонів .NET
-dotnet_diagnostic.SA1200.severity = none
-# приватні поля іменуємо з _, як прийнято в .NET
-dotnet_diagnostic.SA1309.severity = none
-# XML-документацію вимагатимемо з ЛР № 4, поки що ні
-dotnet_diagnostic.SA0001.severity = none
-dotnet_diagnostic.SA1600.severity = warning
-dotnet_diagnostic.SA1601.severity = none
-dotnet_diagnostic.SA1602.severity = none
-# кома в кінці багаторядкового ініціалізатора необов’язкова
-dotnet_diagnostic.SA1413.severity = none
-
-# правила, які лишаємо суворими
-dotnet_diagnostic.SA1028.severity = warning
-dotnet_diagnostic.SA1201.severity = warning
-dotnet_diagnostic.SA1503.severity = warning
-dotnet_diagnostic.SA1516.severity = warning
-dotnet_diagnostic.IDE0055.severity = warning
-
-# ЛР 2: правила, вимкнені свідомо
-# StyleCop вимагає англійських зачинів «Gets or sets» і «Initializes a new instance»,
-# а документація проєкту пишеться українською
-dotnet_diagnostic.SA1623.severity = none
-dotnet_diagnostic.SA1642.severity = none
-# Parse() і ToString() без культури лишено, бо зміна змінить вивід (технічний борг TD-2)
-dotnet_diagnostic.CA1305.severity = none
-
-# константи: PascalCase за п. 2 стандарту (виняток із правила приватних полів)
-dotnet_naming_rule.constants_pascal.symbols = const_field
-dotnet_naming_rule.constants_pascal.style = pascal_case_style
-dotnet_naming_rule.constants_pascal.severity = warning
 dotnet_naming_symbols.const_field.applicable_kinds = field
 dotnet_naming_symbols.const_field.required_modifiers = const
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_rule.constants_pascal.symbols = const_field
+dotnet_naming_rule.constants_pascal.style = pascal_case_style
+dotnet_naming_rule.constants_pascal.severity = error
+
+dotnet_naming_symbols.interface_sym.applicable_kinds = interface
+dotnet_naming_style.i_prefix.capitalization = pascal_case
+dotnet_naming_style.i_prefix.required_prefix = I
+dotnet_naming_rule.interface_i.symbols = interface_sym
+dotnet_naming_rule.interface_i.style = i_prefix
+dotnet_naming_rule.interface_i.severity = error
+
+dotnet_naming_symbols.type_sym.applicable_kinds = class,struct,enum,delegate
+dotnet_naming_rule.types_pascal.symbols = type_sym
+dotnet_naming_rule.types_pascal.style = pascal_case_style
+dotnet_naming_rule.types_pascal.severity = error
+
+dotnet_naming_symbols.local_sym.applicable_kinds = parameter,local
+dotnet_naming_style.camel_style.capitalization = camel_case
+dotnet_naming_rule.locals_camel.symbols = local_sym
+dotnet_naming_rule.locals_camel.style = camel_style
+dotnet_naming_rule.locals_camel.severity = error
+
+dotnet_naming_symbols.async_sym.applicable_kinds = method
+dotnet_naming_symbols.async_sym.required_modifiers = async
+dotnet_naming_style.async_style.capitalization = pascal_case
+dotnet_naming_style.async_style.required_suffix = Async
+dotnet_naming_rule.async_suffix.symbols = async_sym
+dotnet_naming_rule.async_suffix.style = async_style
+dotnet_naming_rule.async_suffix.severity = suggestion
+
+# --- Документація (C) ---
+dotnet_diagnostic.CS1591.severity = error
+dotnet_diagnostic.SA1611.severity = suggestion
+dotnet_diagnostic.SA1615.severity = suggestion
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1601.severity = none
+dotnet_diagnostic.SA1602.severity = none
+
+# --- Керуючі конструкції й складність (S) ---
+dotnet_diagnostic.CA1062.severity = error
+dotnet_diagnostic.CA1002.severity = error
+dotnet_diagnostic.CA1502.severity = error
+dotnet_diagnostic.IDE0066.severity = suggestion
+
+# --- Правила StyleCop і IDE, що лишаємо суворими (F) ---
+dotnet_diagnostic.SA1028.severity = error
+dotnet_diagnostic.SA1124.severity = error
+dotnet_diagnostic.SA1201.severity = error
+dotnet_diagnostic.SA1402.severity = error
+dotnet_diagnostic.SA1503.severity = error
+dotnet_diagnostic.SA1507.severity = error
+dotnet_diagnostic.SA1516.severity = error
+dotnet_diagnostic.SA1649.severity = error
+dotnet_diagnostic.IDE0055.severity = error
+dotnet_diagnostic.IDE0005.severity = suggestion
+
+# --- Заборонені символи (BannedApiAnalyzers, X-02, X-03, D-17) ---
+dotnet_diagnostic.RS0030.severity = error
+
+# --- Свідомі придушення (кожне обґрунтоване, A-04; див. docs/DECISIONS.md) ---
+# SA1633: заголовок з ліцензією в навчальному проєкті не потрібен
+dotnet_diagnostic.SA1633.severity = none
+# SA1101: префікс this. зайвий, бо поля мають префікс _ (N-04)
+dotnet_diagnostic.SA1101.severity = none
+# SA1200: using поза namespace — стандарт шаблонів .NET (F-11)
+dotnet_diagnostic.SA1200.severity = none
+# SA1309: суперечить N-04 (поле з _), див. DR-001
+dotnet_diagnostic.SA1309.severity = none
+# SA1413: кома в кінці багаторядкового ініціалізатора необов'язкова
+dotnet_diagnostic.SA1413.severity = none
+# SA1623, SA1642: StyleCop вимагає англійських зачинів «Gets or sets»,
+# а документація проєкту пишеться українською (C-12)
+dotnet_diagnostic.SA1623.severity = none
+dotnet_diagnostic.SA1642.severity = none
+# CA1305: Parse() і ToString() без культури лишено, бо зміна змінить вивід (борг TD-2)
+dotnet_diagnostic.CA1305.severity = none
 
 [ShopOrders.Tests/**.cs]
-# Імена тестів у форматі Метод_Сценарій_Результат містять підкреслення
+# Імена тестів Метод_Сценарій_Результат містять підкреслення (N-14)
 dotnet_diagnostic.CA1707.severity = none
+# XML-документація тестів не вимагається
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.SA1611.severity = none
+dotnet_diagnostic.SA1615.severity = none

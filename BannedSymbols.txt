@@ -1,0 +1,2 @@
+T:System.Collections.ArrayList;Негенеричні колекції заборонені, використовуйте List<T> (D-11)
+T:System.Collections.Hashtable;Негенеричні колекції заборонені, використовуйте Dictionary<TKey, TValue> (D-11)

@@ -51,11 +51,12 @@ public class Order
     /// </summary>
     /// <param name="id">Номер замовлення.</param>
     /// <param name="customerName">Прізвище покупця.</param>
-    public Order(string id, string customerName)
+    /// <param name="timeProvider">Джерело часу; за замовчуванням системний годинник.</param>
+    public Order(string id, string customerName, TimeProvider? timeProvider = null)
     {
         Id = id;
         CustomerName = customerName;
-        CreatedAt = DateTime.Now;
+        CreatedAt = (timeProvider ?? TimeProvider.System).GetLocalNow().DateTime;
     }
 
     /// <summary>
@@ -85,8 +86,10 @@ public class Order
     /// <param name="orders">Список замовлень, у якому виконується пошук.</param>
     /// <param name="orderId">Шуканий номер замовлення.</param>
     /// <returns>Перше знайдене замовлення або null, якщо такого немає.</returns>
-    public static Order? FindById(List<Order> orders, string orderId)
+    public static Order? FindById(IReadOnlyList<Order> orders, string orderId)
     {
+        ArgumentNullException.ThrowIfNull(orders);
+
         for (int i = 0; i < orders.Count; i++)
         {
             if (orders[i].Id == orderId)
@@ -153,7 +156,7 @@ public class Order
 
         // ПДВ нараховується на суму вже після всіх знижок
         total += total * VatRate;
-        return Math.Round(total, 2);
+        return Math.Round(total, 2, MidpointRounding.AwayFromZero);
     }
 
     /// <summary>

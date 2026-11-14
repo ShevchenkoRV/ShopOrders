@@ -1,10 +1,33 @@
 <Project>
   <PropertyGroup>
+    <!-- C# 12 за п. 1.1 стандарту -->
+    <LangVersion>12.0</LangVersion>
+    <!-- посилання, що можуть бути null, оголошують явно (D-09) -->
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
+    <!-- кожне попередження збірки є помилкою (A-02) -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>8.0-recommended</AnalysisLevel>
+    <AnalysisLevel>8.0</AnalysisLevel>
+    <!-- набір правил якості коду Recommended -->
+    <AnalysisMode>Recommended</AnalysisMode>
+    <!-- правила стилю з .editorconfig діють під час dotnet build -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- без цього CS1591 і IDE0005 не працюють (C-08) -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4"
+                      PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
+  </ItemGroup>
+
+  <!-- бібліотеки логіки: Core і Domain (розділ 1.1 стандарту) -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'ShopOrders.Core' Or '$(MSBuildProjectName)' == 'ShopOrders.Domain'">
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.Domain.txt" />
+  </ItemGroup>
 </Project>

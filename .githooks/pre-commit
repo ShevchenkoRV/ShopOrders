@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# A-06: перевірки перед комітом
+set -e
+dotnet format --verify-no-changes
+dotnet build -warnaserror --nologo
+bash tools/check-style.sh

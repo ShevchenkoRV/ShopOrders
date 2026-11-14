@@ -5,8 +5,15 @@ namespace ShopOrders.Core.Documents;
 /// </summary>
 public enum DocumentStatus
 {
+    /// <summary>Новий документ.</summary>
     New,
+
+    /// <summary>Оплачений документ.</summary>
     Paid,
+
+    /// <summary>Відправлений документ.</summary>
     Shipped,
+
+    /// <summary>Скасований документ.</summary>
     Cancelled,
 }

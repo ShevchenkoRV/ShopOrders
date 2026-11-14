@@ -1,0 +1,12 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ShopOrders.Domain -> C:\dev\ShopOrders\ShopOrders.Domain\bin\Debug\net8.0\ShopOrders.Domain.dll
+  ShopOrders.Core -> C:\dev\ShopOrders\ShopOrders.Core\bin\Debug\net8.0\ShopOrders.Core.dll
+  ShopOrders.App -> C:\dev\ShopOrders\ShopOrders.App\bin\Debug\net8.0\ShopOrders.App.dll
+  ShopOrders.Tests -> C:\dev\ShopOrders\ShopOrders.Tests\bin\Debug\net8.0\ShopOrders.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.42
