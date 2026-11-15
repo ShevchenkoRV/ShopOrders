@@ -1,14 +1,46 @@
+using System;
+
 namespace ShopOrders.Core.Domain;
 
-/// <summary>Покупець інтернет-магазину.</summary>
-public sealed class Customer
+/// <summary>
+/// Незмінний запис довідника клієнтів.
+/// </summary>
+public sealed record Customer
 {
-    /// <summary>Внутрішній номер покупця.</summary>
-    public int Id { get; init; }
+    /// <summary>
+    /// Створює клієнта та перевіряє його інваріанти.
+    /// </summary>
+    /// <param name="id">Ідентифікатор, більший за нуль.</param>
+    /// <param name="name">Ім’я, не порожнє.</param>
+    /// <param name="email">Пошта, що містить символ @.</param>
+    public Customer(int id, string name, string email)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
 
-    /// <summary>Прізвище та ім’я покупця.</summary>
-    public string Name { get; init; } = string.Empty;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Порожнє ім’я", nameof(name));
+        }
 
-    /// <summary>Ознака постійного покупця.</summary>
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        {
+            throw new ArgumentException("Некоректна пошта", nameof(email));
+        }
+
+        Id = id;
+        Name = name;
+        Email = email;
+    }
+
+    /// <summary>Ідентифікатор клієнта.</summary>
+    public int Id { get; }
+
+    /// <summary>Ім’я клієнта.</summary>
+    public string Name { get; }
+
+    /// <summary>Пошта клієнта.</summary>
+    public string Email { get; }
+
+    /// <summary>Ознака постійного клієнта.</summary>
     public bool IsRegular { get; init; }
 }
