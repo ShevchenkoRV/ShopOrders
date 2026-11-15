@@ -1,20 +1,22 @@
 namespace ShopOrders.Core.Domain;
 
-/// <summary>Стан замовлення в його життєвому циклі.</summary>
+/// <summary>
+/// Стан замовлення.
+/// </summary>
 public enum OrderStatus
 {
     /// <summary>Нове замовлення.</summary>
-    New = 0,
+    New,
 
     /// <summary>Оплачене замовлення.</summary>
-    Paid = 1,
+    Paid,
 
     /// <summary>Відправлене замовлення.</summary>
-    Shipped = 2,
+    Shipped,
 
     /// <summary>Скасоване замовлення.</summary>
-    Cancelled = 3,
+    Cancelled,
 
     /// <summary>Повернене замовлення.</summary>
-    Returned = 4,
+    Returned
 }
