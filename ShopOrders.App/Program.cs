@@ -1,23 +1,31 @@
-using System.Text;
-using ShopOrders.Core.Documents;
+using System;
+using System.Globalization;
+using ShopOrders.Core.Abstractions;
 using ShopOrders.Core.Domain;
-using ShopOrders.Core.Reporting;
+using ShopOrders.Core.Pricing;
+using ShopOrders.Core.Services;
+using ShopOrders.Core.Storage;
 
-Console.OutputEncoding = Encoding.UTF8;
+namespace ShopOrders.App;
 
-TotalRequest request = BuildRequestFromInput();
-TotalResult result = DocumentTotalCalculator.Calculate(request);
-string report = DocumentReport.TextOf(request, result);
-new DocumentReportPrinter(Console.Out).Print(report);
-
-static TotalRequest BuildRequestFromInput()
+/// <summary>
+/// Композиційний корінь застосунку.
+/// </summary>
+internal static class Program
 {
-    List<OrderLine> lines = new()
+    private static void Main()
     {
-        new OrderLine { Sku = "A1", Quantity = 12, UnitPrice = 100m },
-        new OrderLine { Sku = "B2", Quantity = 1, UnitPrice = 250m },
-    };
-    ClientInfo client = new("Іваненко", "i@ex.com", true);
-    DateOnly createdAt = new(2026, 3, 10);
-    return new TotalRequest(1, client, lines, createdAt, null, DocumentStatus.New, 60m);
+        // Єдине місце, де програма створює конкретні реалізації
+        var repository = new InMemoryOrderRepository();
+        IPricingPolicy pricing = new DiscountPricingPolicy(0.05m);
+        INotifier notifier = new ConsoleNotifier();
+        var service = new OrderService(repository, pricing, notifier);
+
+        var order = new Order(1, 100, new DateOnly(2026, 11, 15));
+        order.AddLine(new OrderLine("SKU-1", 2, 250m));
+        service.Place(order);
+
+        decimal total = service.TotalOf(order);
+        Console.WriteLine("Сума: " + total.ToString("0.00", new CultureInfo("uk-UA")));
+    }
 }

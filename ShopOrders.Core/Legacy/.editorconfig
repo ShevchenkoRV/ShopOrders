@@ -1,0 +1,11 @@
+# Навчальний застарілий код для аудиту SOLID (завдання 5): правила стандарту не застосовуються
+[*.cs]
+dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.CA1002.severity = none
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1512.severity = none
+dotnet_diagnostic.SA1649.severity = none
+dotnet_diagnostic.SA1402.severity = none
+dotnet_diagnostic.CS1591.severity = none
