@@ -8,7 +8,7 @@ public class Buyer
     public int Id;
     public string Name = "";
     public string Email = "";
-    public string Kind = "regular";
+    public ClientKind Kind = ClientKind.Regular;
     public int DoneCount;
     public DateTime SinceUtc;
 }
@@ -29,15 +29,15 @@ public class LegacyOrderProcessor
 
     public string Handle(int docId, int clientId,
         string clientName, string? clientMail,
-        string clientKind, int clientDone,
-        List<OrderLine>? items, string state,
+        ClientKind clientKind, int clientDone,
+        List<OrderLine>? items, DocState state,
         string currency, DateTime createdAt, bool sendMail)
     {
         if (items != null)
         {
             if (items.Count > 0)
             {
-                if (state == "new" || state == "paid")
+                if (state == DocState.New || state == DocState.Paid)
                 {
                     if (clientMail != null &&
                         clientMail.Contains("@"))
@@ -69,12 +69,12 @@ public class LegacyOrderProcessor
             _tmpSum += items[i].Qty * items[i].Price;
         }
         _tmpDiscount = 0m;
-        if (clientKind == "vip")
+        if (clientKind == ClientKind.Vip)
         {
             _tmpDiscount = _tmpSum * PricingRules.VipRate;
             if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
         }
-        else if (clientKind == "staff")
+        else if (clientKind == ClientKind.Staff)
         {
             _tmpDiscount = _tmpSum * PricingRules.StaffRate;
             if (_tmpDiscount > PricingRules.MaxDiscount) _tmpDiscount = PricingRules.MaxDiscount;
@@ -108,7 +108,7 @@ public class LegacyOrderProcessor
         return txt;
     }
 
-    public decimal Preview(string clientKind, int clientDone,
+    public decimal Preview(ClientKind clientKind, int clientDone,
         List<OrderLine> items)
     {
         decimal s = 0m;
@@ -117,12 +117,12 @@ public class LegacyOrderProcessor
             s += it.Qty * it.Price;
         }
         decimal d = 0m;
-        if (clientKind == "vip")
+        if (clientKind == ClientKind.Vip)
         {
             d = s * PricingRules.VipRate;
             if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
         }
-        else if (clientKind == "staff")
+        else if (clientKind == ClientKind.Staff)
         {
             d = s * PricingRules.StaffRate;
             if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
@@ -140,7 +140,7 @@ public class LegacyOrderProcessor
     public string DescribeClient(Buyer c)
     {
         string s = c.Name.Trim().ToUpper();
-        if (c.Kind == "vip") s += " [VIP]";
+        if (c.Kind == ClientKind.Vip) s += " [VIP]";
         if (c.DoneCount > PricingRules.LoyalOrders) s += " [ЛОЯЛЬНИЙ]";
         s += " <" + c.Email.ToLower() + ">";
         int years = DateTime.Now.Year - c.SinceUtc.Year;
