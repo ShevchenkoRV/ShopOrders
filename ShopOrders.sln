@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.App", "ShopOrder
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Domain", "ShopOrders.Domain\ShopOrders.Domain.csproj", "{DBA335C3-7728-4AC2-94B1-976E44673022}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1B0D0684-3121-4B72-921B-CF8B3D1242BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Legacy", "src\Legacy\ShopOrders.Legacy.csproj", "{2BE9916B-3F71-49DA-B097-B83349015CC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,12 @@ Global
 		{DBA335C3-7728-4AC2-94B1-976E44673022}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBA335C3-7728-4AC2-94B1-976E44673022}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBA335C3-7728-4AC2-94B1-976E44673022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2BE9916B-3F71-49DA-B097-B83349015CC5} = {1B0D0684-3121-4B72-921B-CF8B3D1242BF}
 	EndGlobalSection
 EndGlobal
