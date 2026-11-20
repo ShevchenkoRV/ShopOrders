@@ -1,5 +1,7 @@
 # ShopOrders
 
+![CI](https://github.com/ShevchenkoRV/ShopOrders/actions/workflows/ci.yml/badge.svg)
+
 Навчальний проєкт з дисципліни «Конструювання програмного забезпечення».
 Варіант № 1: облік замовлень інтернет-магазину.
 
