@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ShopOrders.Domain;
 
 /// <summary>
@@ -108,8 +110,8 @@ public class Order
     {
         string[] line = new string[3];
         line[0] = sku;
-        line[1] = quantity.ToString();
-        line[2] = unitPrice.ToString();
+        line[1] = quantity.ToString(CultureInfo.InvariantCulture);
+        line[2] = unitPrice.ToString(CultureInfo.InvariantCulture);
         _lines.Add(line);
     }
 
@@ -125,8 +127,8 @@ public class Order
 
         for (int i = 0; i < _lines.Count; i++)
         {
-            int quantity = int.Parse(_lines[i][1]);
-            decimal unitPrice = decimal.Parse(_lines[i][2]);
+            int quantity = int.Parse(_lines[i][1], CultureInfo.InvariantCulture);
+            decimal unitPrice = decimal.Parse(_lines[i][2], CultureInfo.InvariantCulture);
             total += quantity * unitPrice;
             lineCount++;
         }
@@ -215,7 +217,7 @@ public class Order
         for (int i = 0; i < _lines.Count; i++)
         {
             string[] line = _lines[i];
-            decimal amount = int.Parse(line[1]) * decimal.Parse(line[2]);
+            decimal amount = int.Parse(line[1], CultureInfo.InvariantCulture) * decimal.Parse(line[2], CultureInfo.InvariantCulture);
             report = report + "Товар: " + line[0] + "; кількість: " + line[1]
                 + "; ціна: " + line[2] + "; сума: " + amount + "\n";
         }
