@@ -6,6 +6,10 @@ namespace ShopOrders.Core;
 // Межа між «брудними» даними ззовні та сутностями.
 public static class OrderLineParser
 {
+    private const int MaxSkuLength = 20;
+    private const int MinQuantity = 1;
+    private const int MaxQuantity = 1000;
+
     public static bool TryParse(string? raw, out OrderLine? line)
     {
         line = null;
@@ -15,14 +19,14 @@ public static class OrderLineParser
         }
 
         var p = raw.Split(';');
-        if (p.Length != 3 || p[0].Trim().Length is 0 or > 20)
+        if (p.Length != 3 || p[0].Trim().Length is 0 or > MaxSkuLength)
         {
             return false;
         }
 
         var ci = CultureInfo.InvariantCulture;
         if (!int.TryParse(p[1], NumberStyles.Integer, ci, out var qty)
-            || qty is < 1 or > 1000)
+            || qty is < MinQuantity or > MaxQuantity)
         {
             return false;
         }
