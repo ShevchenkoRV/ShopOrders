@@ -33,40 +33,14 @@ public class LegacyOrderProcessor
         List<OrderLine>? items, DocState state,
         string currency, DateTime createdAt, bool sendMail)
     {
-        if (items != null)
-        {
-            if (items.Count > 0)
-            {
-                if (state == DocState.New || state == DocState.Paid)
-                {
-                    if (clientMail != null &&
-                        clientMail.Contains("@"))
-                    {
-                        _log.Add("ok " + docId);
-                    }
-                    else
-                    {
-                        return "ERR: mail";
-                    }
-                }
-                else
-                {
-                    return "ERR: state";
-                }
-            }
-            else
-            {
-                return "ERR: empty";
-            }
-        }
-        else
-        {
-            return "ERR: null";
-        }
+        var error = Validate(items, state, clientMail);
+        if (error != null) return error;
+        _log.Add("ok " + docId);
+        var lines = items!;
         _tmpSum = 0m;
-        for (int i = 0; i < items.Count; i++)
+        for (int i = 0; i < lines.Count; i++)
         {
-            _tmpSum += items[i].Qty * items[i].Price;
+            _tmpSum += lines[i].Qty * lines[i].Price;
         }
         _tmpDiscount = 0m;
         if (clientKind == ClientKind.Vip)
@@ -89,10 +63,10 @@ public class LegacyOrderProcessor
         decimal total = _tmpSum - _tmpDiscount + ship;
         string txt = "Документ #" + docId + "\n";
         txt += "Клієнт: " + clientName + "\n";
-        for (int i = 0; i < items.Count; i++)
+        for (int i = 0; i < lines.Count; i++)
         {
-            txt += items[i].Code + " x" + items[i].Qty + " = " +
-                (items[i].Qty * items[i].Price)
+            txt += lines[i].Code + " x" + lines[i].Qty + " = " +
+                (lines[i].Qty * lines[i].Price)
                 .ToString("0.00") + " " + currency + "\n";
         }
         txt += "Знижка: " + _tmpDiscount.ToString("0.00") +
@@ -106,6 +80,15 @@ public class LegacyOrderProcessor
             _log.Add("mail -> " + clientMail);
         }
         return txt;
+    }
+
+    private static string? Validate(List<OrderLine>? items, DocState state, string? mail)
+    {
+        if (items is null) return "ERR: null";
+        if (items.Count == 0) return "ERR: empty";
+        if (state is not (DocState.New or DocState.Paid)) return "ERR: state";
+        if (mail is null || !mail.Contains("@")) return "ERR: mail";
+        return null;
     }
 
     public decimal Preview(ClientKind clientKind, int clientDone,
