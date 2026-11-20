@@ -31,6 +31,7 @@ function W([string]$path, [string]$text) {
     $full = if ([IO.Path]::IsPathRooted($path)) { $path } else { Join-Path (Get-Location).Path $path }
     $dir = Split-Path $full
     if (!(Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
+    if (-not $text.EndsWith("`n")) { $text += "`n" }
     [IO.File]::WriteAllText($full, $text, $utf8)
 }
 
@@ -170,10 +171,18 @@ public static class VersionInfo
             $ls = [System.Collections.Generic.List[string]]([IO.File]::ReadAllLines($prog))
             $idx = -1
             for ($i = 0; $i -lt [Math]::Min(40, $ls.Count); $i++) { if ($ls[$i] -match '^using\s+[^(]*;') { $idx = $i } }
-            $ls.Insert($idx + 1, $line)
+            $ls.Insert($idx + 1, '')
+            $ls.Insert($idx + 2, $line)
             $pc = ($ls -join "`n") + "`n"
         }
         [IO.File]::WriteAllText($prog, $pc, $utf8)
+    }
+    # ремонт: порожній рядок між using і нашим рядком (SA1516), якщо вставлено без нього
+    $ls2 = [System.Collections.Generic.List[string]]([IO.File]::ReadAllLines($prog))
+    $vi = $ls2.FindIndex({ param($s) $s -match 'VersionInfo\.Current' })
+    if ($vi -gt 0 -and $ls2[$vi - 1] -match '^\s*using\s') {
+        $ls2.Insert($vi, '')
+        [IO.File]::WriteAllText($prog, (($ls2 -join "`n") + "`n"), $utf8)
     }
     $appRef = Select-String -Path $app.FullName -Pattern 'ShopOrders.Core' -Quiet
     if (-not $appRef) { Run "dotnet add `"$($app.FullName)`" reference `"$($core.FullName)`"" }
