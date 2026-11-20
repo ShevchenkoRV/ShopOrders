@@ -20,4 +20,10 @@ public sealed class ReportBuilder
 
         return text.ToString();
     }
+
+    public string Describe()
+    {
+        int unused = 1;
+        return Title;
+    }
 }
