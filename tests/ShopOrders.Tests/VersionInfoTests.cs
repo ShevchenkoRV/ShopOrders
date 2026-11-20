@@ -9,6 +9,6 @@ public class VersionInfoTests
     public void Current_HasNoBuildMetadataSuffix()
     {
         Assert.False(string.IsNullOrWhiteSpace(VersionInfo.Current));
-        Assert.DoesNotContain('+', VersionInfo.Current, StringComparison.Ordinal);
+        Assert.DoesNotContain("+", VersionInfo.Current, StringComparison.Ordinal);
     }
 }

@@ -10,7 +10,7 @@ public class ReportBuilderTests
     {
         var builder = new ReportBuilder { Title = "abc" };
 
-        var text = builder.Build(new[] { "row1", "row2" });
+        var text = builder.Build(new List<string> { "row1", "row2" });
 
         Assert.Contains("ABC", text, StringComparison.Ordinal);
         Assert.Contains("row1", text, StringComparison.Ordinal);

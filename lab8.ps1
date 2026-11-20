@@ -44,6 +44,11 @@ function Commit([string]$msg) {
 
 function Note([string]$line) { Add-Content -Path (Join-Path $out 'summary.txt') -Value $line -Encoding UTF8 }
 
+function Open([string]$url) {
+    Write-Host "Відкрийте в браузері: $url" -ForegroundColor Magenta
+    try { Start-Process $url -ErrorAction Stop } catch { }
+}
+
 function Shot([string]$what) {
     Write-Host "`n>>> ЗРОБІТЬ СКРІН: $what" -ForegroundColor Magenta
     Read-Host "    Коли збережете скрін, натисніть Enter"
@@ -78,7 +83,14 @@ if (-not $repo) { Fail "gh не бачить репозиторій (чи є rem
 $projs = Get-ChildItem -Recurse -Filter *.csproj | Where-Object { $_.FullName -notmatch '[\\/](bin|obj)[\\/]' }
 $core  = $projs | Where-Object Name -eq 'ShopOrders.Core.csproj'  | Select-Object -First 1
 $app   = $projs | Where-Object Name -eq 'ShopOrders.App.csproj'   | Select-Object -First 1
-$tests = $projs | Where-Object Name -like '*Tests*.csproj' | Select-Object -First 1
+$tests = $projs | Where-Object Name -eq 'ShopOrders.Tests.csproj' | Select-Object -First 1
+if (-not $tests) {
+    Write-Host 'Створюю тестовий проєкт tests\ShopOrders.Tests (xunit)...' -ForegroundColor Green
+    dotnet new xunit -n ShopOrders.Tests -o tests\ShopOrders.Tests -f net8.0 | Out-Host
+    Remove-Item tests\ShopOrders.Tests\UnitTest1.cs -ErrorAction SilentlyContinue
+    $projs = Get-ChildItem -Recurse -Filter *.csproj | Where-Object { $_.FullName -notmatch '[\\/](bin|obj)[\\/]' }
+    $tests = $projs | Where-Object Name -eq 'ShopOrders.Tests.csproj' | Select-Object -First 1
+}
 if ($tests) { Write-Host "Тестовий проєкт: $($tests.FullName)" -ForegroundColor Green }
 if (-not ($core -and $app -and $tests)) {
     Fail ("Не знайшов Core/App/Tests .csproj. Знайдено:`n" + (($projs | ForEach-Object { $_.FullName }) -join "`n"))
@@ -308,6 +320,8 @@ if ($From -le 4) {
     if ($fmt -ne 0) { Fail 'Форматування не проходить - виконайте dotnet format і повторіть з -From 4.' }
     Shot 'Рисунок 2: вікно з «0 Warning(s) 0 Error(s)» і кодом виходу format = 0'
 
+    $inSln = dotnet sln $sln.FullName list | Select-String ([regex]::Escape($tests.Name))
+    if (-not $inSln) { Run "dotnet sln `"$($sln.FullName)`" add `"$($tests.FullName)`"" }
     Run "dotnet add `"$($tests.FullName)`" package coverlet.msbuild --version 6.0.2"
     if (-not (Select-String -Path $tests.FullName -Pattern 'ShopOrders.Core' -Quiet)) {
         Run "dotnet add `"$($tests.FullName)`" reference `"$($core.FullName)`""
@@ -325,7 +339,7 @@ public class ReportBuilderTests
     {
         var builder = new ReportBuilder { Title = "abc" };
 
-        var text = builder.Build(new[] { "row1", "row2" });
+        var text = builder.Build(new List<string> { "row1", "row2" });
 
         Assert.Contains("ABC", text, StringComparison.Ordinal);
         Assert.Contains("row1", text, StringComparison.Ordinal);
@@ -353,7 +367,83 @@ public class VersionInfoTests
     public void Current_HasNoBuildMetadataSuffix()
     {
         Assert.False(string.IsNullOrWhiteSpace(VersionInfo.Current));
-        Assert.DoesNotContain('+', VersionInfo.Current, StringComparison.Ordinal);
+        Assert.DoesNotContain("+", VersionInfo.Current, StringComparison.Ordinal);
+    }
+}
+'@
+    W (Join-Path $testsDir 'OrderTests.cs') @'
+using ShopOrders.Core.Domain;
+using Xunit;
+
+namespace ShopOrders.Tests;
+
+public class OrderTests
+{
+    [Fact]
+    public void Total_NoLines_ReturnsZero()
+    {
+        var order = new Order { Id = 1, CustomerId = 2 };
+
+        Assert.Equal(0m, order.Total());
+        Assert.Empty(order.Lines);
+    }
+
+    [Fact]
+    public void Total_TwoLines_SumsAmounts()
+    {
+        var order = new Order();
+        order.AddLine(new OrderLine { Sku = "A", Quantity = 2, UnitPrice = 10.5m });
+        order.AddLine(new OrderLine { Sku = "B", Quantity = 1, UnitPrice = 4m });
+
+        Assert.Equal(25m, order.Total());
+        Assert.Equal(2, order.Lines.Count);
+    }
+
+    [Fact]
+    public void Status_NewOrder_IsNewAndCanChange()
+    {
+        var order = new Order { CreatedAt = DateTimeOffset.UnixEpoch };
+
+        Assert.Equal(OrderStatus.New, order.Status);
+        order.Status = OrderStatus.Paid;
+        Assert.Equal(OrderStatus.Paid, order.Status);
+    }
+}
+'@
+    W (Join-Path $testsDir 'CatalogModelTests.cs') @'
+using ShopOrders.Core.Domain;
+using Xunit;
+
+namespace ShopOrders.Tests;
+
+public class CatalogModelTests
+{
+    [Fact]
+    public void OrderLine_Amount_IsQuantityTimesUnitPrice()
+    {
+        var line = new OrderLine { Sku = "SKU-1", Quantity = 3, UnitPrice = 2.5m };
+
+        Assert.Equal(7.5m, line.Amount);
+    }
+
+    [Fact]
+    public void Customer_Defaults_AreEmptyAndNotRegular()
+    {
+        var customer = new Customer();
+
+        Assert.Equal(string.Empty, customer.Name);
+        Assert.False(customer.IsRegular);
+    }
+
+    [Fact]
+    public void Product_InitializedValues_AreStored()
+    {
+        var product = new Product { Sku = "SKU-1", Title = "Mug", Price = 99.9m, Stock = 5 };
+
+        Assert.Equal("SKU-1", product.Sku);
+        Assert.Equal("Mug", product.Title);
+        Assert.Equal(99.9m, product.Price);
+        Assert.Equal(5, product.Stock);
     }
 }
 '@
@@ -405,9 +495,10 @@ jobs:
 '@
     $cl = Join-Path $out 'coverage-local.log'
     $c = RunLog "dotnet test `"$($sln.FullName)`" -c Release /p:CollectCoverage=true /p:Threshold=60 /p:ThresholdType=line" $cl
-    $m = Select-String -Path $cl -Pattern '\|\s*Total\s*\|\s*([\d\.]+)%' | Select-Object -First 1
+    $m = Select-String -Path $cl -Pattern '\|\s*Total\s*\|\s*([\d\.,]+)%' | Select-Object -First 1
     $cov = if ($m) { $m.Matches[0].Groups[1].Value } else { '?' }
     Note "Локальне покриття рядків: $cov % (поріг 60 %)"
+    if ($cov -eq '?') { Fail 'Тести не запустилися (немає таблиці покриття). Перевірте, що tests\ShopOrders.Tests входить у .sln.' }
     if ($c -ne 0) { Fail "Тести/поріг покриття не пройшли (покриття $cov %). Допишіть тести й повторіть з -From 4." }
 
     Commit 'ci: add GitHub Actions workflow with coverage gate'
@@ -416,7 +507,7 @@ jobs:
     $r = WaitRun $sha
     Note "CI зелений запуск (завд.4): $($r.Url) - $($r.Conclusion)"
     if ($r.Conclusion -ne 'success') { Fail "CI не зелений: $($r.Url). Відкрийте журнал, виправте й повторіть з -From 4." }
-    Start-Process $r.Url
+    Open $r.Url
     Shot 'Рисунок 3: сторінка запуску у вкладці Actions: зелена позначка, кроки з часом'
 }
 
@@ -447,7 +538,7 @@ if ($From -le 5) {
     $errs = Select-String -Path (Join-Path $out 'red-run-full.log') -Pattern 'error (CS|CA|SA|IDE)\d+|exit code' | ForEach-Object { $_.Line.Trim() } | Select-Object -Unique
     [IO.File]::WriteAllLines((Join-Path $out 'lst6.txt'), [string[]]$errs, $utf8)
     Info "`nЛістинг 6 (рядки помилки з журналу):"; $errs | ForEach-Object { Write-Host $_ }
-    Start-Process $r.Url
+    Open $r.Url
     Shot 'Рисунок 4: ЧЕРВОНИЙ запуск у Actions (видно крок, що впав, і червону позначку)'
 
     Run 'git revert HEAD --no-edit'
@@ -455,8 +546,8 @@ if ($From -le 5) {
     $sha = git rev-parse HEAD
     $r = WaitRun $sha
     if ($r.Conclusion -ne 'success') { Fail "Після revert CI не зелений: $($r.Url)" }
-    Start-Process $r.Url
-    Start-Process "https://github.com/$repo/tree/$branch"
+    Open $r.Url
+    Open "https://github.com/$repo/tree/$branch"
     Shot 'Рисунок 5: ЗЕЛЕНИЙ запуск після revert (і, за бажанням, README з зеленим бейджем на сторінці гілки)'
 }
 
@@ -483,6 +574,7 @@ public sealed record OrderLine(string Sku, int Quantity, decimal Price);
 
     W (Join-Path $coreDir 'OrderLineParser.cs') @'
 using System.Globalization;
+using ShopOrders.Core.Domain;
 
 namespace ShopOrders.Core;
 
@@ -516,7 +608,12 @@ public static class OrderLineParser
             return false;
         }
 
-        line = new OrderLine(p[0].Trim(), qty, price);
+        line = new OrderLine
+        {
+            Sku = p[0].Trim(),
+            Quantity = qty,
+            UnitPrice = price,
+        };
         return true;
     }
 }
@@ -632,7 +729,7 @@ public class OrderLineParserValidTests
     $null = RunLog "dotnet test `"$($sln.FullName)`" -c Release /p:CollectCoverage=true /p:Threshold=60 /p:ThresholdType=line" $tl
     $nt = (Select-String -Path $tl -Pattern 'Passed:\s*(\d+)' | Select-Object -First 1)
     $nTests = if ($nt) { $nt.Matches[0].Groups[1].Value } else { '?' }
-    $m = Select-String -Path $tl -Pattern '\|\s*Total\s*\|\s*([\d\.]+)%' | Select-Object -First 1
+    $m = Select-String -Path $tl -Pattern '\|\s*Total\s*\|\s*([\d\.,]+)%' | Select-Object -First 1
     $cov = if ($m) { $m.Matches[0].Groups[1].Value } else { '?' }
     Note "Остаточно: тестів $nTests, покриття $cov %"
 
@@ -665,7 +762,7 @@ public class OrderLineParserValidTests
     Run "gh pr create --base main --head $branch --title `"ci: build, analyzers and CI pipeline`" --body-file `"$bf`""
     Start-Sleep -Seconds 15
     gh pr checks --watch | Out-Host
-    Run 'gh pr view --web'
+    Open (gh pr view --json url -q .url)
     Shot 'Рисунок 6: сторінка PR: опис, чекліст самоогляду (галочки), зелені перевірки внизу'
 
     Run 'gh pr merge --squash --delete-branch'
@@ -679,7 +776,7 @@ public class OrderLineParserValidTests
 Say 'ГОТОВО'
 Info "Усі виводи та числа для звіту: $out"
 Get-Content (Join-Path $out 'summary.txt')
-Start-Process $out
+try { Start-Process $out -ErrorAction Stop } catch { }
 Write-Host @"
 
 Що куди вставити у звіт:
