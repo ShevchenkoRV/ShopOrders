@@ -25,6 +25,9 @@ public class LegacyOrderProcessor
 {
     private decimal _tmpSum;
     private decimal _tmpDiscount;
+    private readonly DiscountPolicy _discounts = new();
+    private readonly ShippingPolicy _shipping = new();
+    private readonly ReportBuilder _report = new();
     private readonly List<string> _log = new();
 
     public string Handle(int docId, int clientId,
@@ -38,28 +41,14 @@ public class LegacyOrderProcessor
         _log.Add("ok " + docId);
         var lines = items!;
         _tmpSum = Subtotal(lines);
-        _tmpDiscount = DiscountOf(_tmpSum, clientKind, clientDone);
-        decimal ship = ShippingOf(_tmpSum - _tmpDiscount);
+        _tmpDiscount = _discounts.For(_tmpSum, clientKind, clientDone);
+        decimal ship = _shipping.For(_tmpSum - _tmpDiscount);
         decimal total = _tmpSum - _tmpDiscount + ship;
-        string txt = "Документ #" + docId + "\n";
-        txt += "Клієнт: " + clientName + "\n";
-        for (int i = 0; i < lines.Count; i++)
-        {
-            txt += lines[i].Code + " x" + lines[i].Qty + " = " +
-                (lines[i].Qty * lines[i].Price)
-                .ToString("0.00") + " " + currency + "\n";
-        }
-        txt += "Знижка: " + _tmpDiscount.ToString("0.00") +
-            " " + currency + "\n";
-        txt += "Доставка: " + ship.ToString("0.00") +
-            " " + currency + "\n";
-        txt += "Разом: " + total.ToString("0.00") +
-            " " + currency + "\n";
         if (sendMail)
         {
             _log.Add("mail -> " + clientMail);
         }
-        return txt;
+        return _report.Build(docId, clientName, lines, currency, _tmpDiscount, ship, total);
     }
 
     private static string? Validate(List<OrderLine>? items, DocState state, string? mail)
@@ -78,38 +67,12 @@ public class LegacyOrderProcessor
         return sum;
     }
 
-    private static decimal DiscountOf(decimal subtotal, ClientKind clientKind, int clientDone)
-    {
-        decimal d = 0m;
-        if (clientKind == ClientKind.Vip)
-        {
-            d = subtotal * PricingRules.VipRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        else if (clientKind == ClientKind.Staff)
-        {
-            d = subtotal * PricingRules.StaffRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        else if (clientDone > PricingRules.LoyalOrders)
-        {
-            d = subtotal * PricingRules.LoyalRate;
-            if (d > PricingRules.MaxDiscount) d = PricingRules.MaxDiscount;
-        }
-        return d;
-    }
-
-    private static decimal ShippingOf(decimal payable)
-    {
-        return payable < PricingRules.FreeShipFrom ? PricingRules.ShipCost : 0m;
-    }
-
     public decimal Preview(ClientKind clientKind, int clientDone,
         List<OrderLine> items)
     {
         var subtotal = Subtotal(items);
-        var payable = subtotal - DiscountOf(subtotal, clientKind, clientDone);
-        return payable + ShippingOf(payable);
+        var payable = subtotal - _discounts.For(subtotal, clientKind, clientDone);
+        return payable + _shipping.For(payable);
     }
 
     public string DescribeClient(Buyer c)
