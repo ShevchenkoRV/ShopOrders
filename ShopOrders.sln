@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1B0D0684-312
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Legacy", "src\Legacy\ShopOrders.Legacy.csproj", "{2BE9916B-3F71-49DA-B097-B83349015CC5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{991785B4-83D9-47AB-9F46-1F24680378D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopOrders.Legacy.Tests", "tests\Legacy.Tests\ShopOrders.Legacy.Tests.csproj", "{A7C21686-6345-487A-91A4-D526D7B4B3F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,8 +42,13 @@ Global
 		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BE9916B-3F71-49DA-B097-B83349015CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7C21686-6345-487A-91A4-D526D7B4B3F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C21686-6345-487A-91A4-D526D7B4B3F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7C21686-6345-487A-91A4-D526D7B4B3F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7C21686-6345-487A-91A4-D526D7B4B3F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2BE9916B-3F71-49DA-B097-B83349015CC5} = {1B0D0684-3121-4B72-921B-CF8B3D1242BF}
+		{A7C21686-6345-487A-91A4-D526D7B4B3F8} = {991785B4-83D9-47AB-9F46-1F24680378D5}
 	EndGlobalSection
 EndGlobal
