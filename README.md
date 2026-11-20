@@ -1,5 +1,7 @@
 # ShopOrders
 
+![CI](https://github.com/ShevchenkoRV/ShopOrders/actions/workflows/ci.yml/badge.svg)
+
 Навчальний проєкт з дисципліни «Конструювання програмного забезпечення».
 Варіант № 1: облік замовлень інтернет-магазину.
 
@@ -25,3 +27,12 @@
 ## Автор
 
 Шевченко Ростислав Володимирович, група 472
+
+## Конвеєр CI
+
+На кожен push у `main` та `feature/**` і на кожен pull request у `main` виконується:
+
+1. `dotnet format --verify-no-changes` - форматування;
+2. `dotnet build -c Release` - складання без попереджень (TreatWarningsAsErrors);
+3. `dotnet test` - тести;
+4. покриття рядків не нижче 60 %.

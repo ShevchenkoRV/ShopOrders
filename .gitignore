@@ -487,3 +487,7 @@ $RECYCLE.BIN/
 data/*.local.json
 # keep ShopOrders.App folder (masked by *.app)
 !ShopOrders.App/
+
+appsettings.Local.json
+**/*.secrets.json
+.env
