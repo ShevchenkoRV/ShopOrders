@@ -2,14 +2,16 @@ namespace ShopOrders.Legacy;
 
 public sealed class DiscountPolicy
 {
-    public decimal For(decimal subtotal, ClientKind kind, int doneCount)
+    public decimal For(decimal subtotal, Buyer c)
     {
-        var rate = kind switch
-        {
-            ClientKind.Vip => PricingRules.VipRate,
-            ClientKind.Staff => PricingRules.StaffRate,
-            _ => doneCount > PricingRules.LoyalOrders ? PricingRules.LoyalRate : 0m
-        };
+        var rate = RateFor(c);
         return Math.Min(subtotal * rate, PricingRules.MaxDiscount);
     }
+
+    private static decimal RateFor(Buyer c) => c.Kind switch
+    {
+        ClientKind.Vip => PricingRules.VipRate,
+        ClientKind.Staff => PricingRules.StaffRate,
+        _ => c.IsLoyal ? PricingRules.LoyalRate : 0m
+    };
 }

@@ -20,6 +20,9 @@ public class LegacyCharacterizationTests
     private static ClientKind K(string s) => Enum.Parse<ClientKind>(s, true);
     private static DocState S(string s) => Enum.Parse<DocState>(s, true);
 
+    private static Buyer B(string name, string mail, ClientKind kind, int done) =>
+        new Buyer { Id = 7, Name = name, Email = mail, Kind = kind, DoneCount = done };
+
     [Theory]
     [InlineData(null, "new", "a@b.c", "ERR: null")]
     [InlineData("empty", "new", "a@b.c", "ERR: empty")]
@@ -34,19 +37,18 @@ public class LegacyCharacterizationTests
             "empty" => new List<OrderLine>(),
             _ => null
         };
-        var sut = new LegacyOrderProcessor();
-        var actual = sut.Handle(1001, 7, "Іван", mail, ClientKind.Regular, 0,
-            items, S(state), "UAH", new DateTime(2026, 3, 1), false);
+        var sut = new OrderProcessor();
+        var actual = sut.Handle(new OrderRequest(1001,
+            B("Іван", mail, ClientKind.Regular, 0), items, S(state), "UAH", false));
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public void Handle_VipOrder_ReturnsExactReport()
     {
-        var sut = new LegacyOrderProcessor();
-        var report = sut.Handle(1001, 7, "Іван", "a@b.c",
-            ClientKind.Vip, 3, TwoLines(), DocState.New, "UAH",
-            new DateTime(2026, 3, 1), false);
+        var sut = new OrderProcessor();
+        var report = sut.Handle(new OrderRequest(1001,
+            B("Іван", "a@b.c", ClientKind.Vip, 3), TwoLines(), DocState.New, "UAH", false));
         var expected =
             "Документ #1001\n" +
             "Клієнт: Іван\n" +
@@ -65,8 +67,8 @@ public class LegacyCharacterizationTests
     [InlineData("regular", 11, 725)]
     public void Preview_ByKind_ReturnsTotal(string kind, int done, decimal expected)
     {
-        var sut = new LegacyOrderProcessor();
-        var total = sut.Preview(K(kind), done, TwoLines());
+        var sut = new OrderProcessor();
+        var total = sut.Preview(B("Іван", "a@b.c", K(kind), done), TwoLines());
         Assert.Equal(expected, total);
     }
 
@@ -84,7 +86,7 @@ public class LegacyCharacterizationTests
         var years = DateTime.Now.Year - 2020;
         var expected = "ІВАН [VIP] [ЛОЯЛЬНИЙ] " +
             "<ivan@mail.com> стаж " + years;
-        var actual = new LegacyOrderProcessor().DescribeClient(c);
+        var actual = new OrderProcessor().DescribeClient(c);
         Assert.Equal(expected, actual);
     }
 
@@ -97,16 +99,16 @@ public class LegacyCharacterizationTests
         {
             new OrderLine { Code = "X", Qty = 1, Price = 1000m }
         };
-        var total = new LegacyOrderProcessor().Preview(ClientKind.Regular, 0, items);
+        var total = new OrderProcessor().Preview(B("Іван", "a@b.c", ClientKind.Regular, 0), items);
         Assert.Equal(1000m, total);
     }
 
     [Fact]
     public void DumpLog_AfterHandleWithMail_ReturnsLogLines()
     {
-        var sut = new LegacyOrderProcessor();
-        sut.Handle(1001, 7, "Іван", "a@b.c", ClientKind.Regular, 0,
-            TwoLines(), DocState.New, "UAH", new DateTime(2026, 3, 1), true);
+        var sut = new OrderProcessor();
+        sut.Handle(new OrderRequest(1001,
+            B("Іван", "a@b.c", ClientKind.Regular, 0), TwoLines(), DocState.New, "UAH", true));
         Assert.Equal("ok 1001\nmail -> a@b.c\n", sut.DumpLog());
     }
 }

@@ -4,17 +4,17 @@ namespace ShopOrders.Legacy;
 
 public sealed class ReportBuilder
 {
-    public string Build(int docId, string clientName, List<OrderLine> items,
-        string currency, decimal discount, decimal shipping, decimal total)
+    public string Build(OrderRequest req, decimal discount,
+        decimal shipping, decimal total)
     {
         var sb = new StringBuilder();
-        sb.Append("Документ #").Append(docId).Append('\n');
-        sb.Append("Клієнт: ").Append(clientName).Append('\n');
-        foreach (var it in items)
-            sb.Append(Line(it, currency));
-        sb.Append(Money("Знижка", discount, currency));
-        sb.Append(Money("Доставка", shipping, currency));
-        sb.Append(Money("Разом", total, currency));
+        sb.Append("Документ #").Append(req.DocId).Append('\n');
+        sb.Append("Клієнт: ").Append(req.Client.Name).Append('\n');
+        foreach (var it in req.Items!)
+            sb.Append(Line(it, req.Currency));
+        sb.Append(Money("Знижка", discount, req.Currency));
+        sb.Append(Money("Доставка", shipping, req.Currency));
+        sb.Append(Money("Разом", total, req.Currency));
         return sb.ToString();
     }
 
